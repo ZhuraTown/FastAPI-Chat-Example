@@ -1,8 +1,8 @@
-"""Create table User
+"""Add users table
 
-Revision ID: a9a3e4bf3d62
+Revision ID: 797d8b41f1cd
 Revises: 
-Create Date: 2024-02-26 10:31:10.282274
+Create Date: 2024-02-27 14:15:44.778688
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'a9a3e4bf3d62'
+revision: str = '797d8b41f1cd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,6 +27,9 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=False),
+    sa.Column('first_name', sa.String(length=64), nullable=False),
+    sa.Column('last_name', sa.String(length=64), nullable=False),
+    sa.Column('middle_name', sa.String(length=64), nullable=True),
     sa.Column('id', fastapi_users_db_sqlalchemy.generics.GUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text("timezone('UTC', CURRENT_TIMESTAMP)"), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text("timezone('UTC', CURRENT_TIMESTAMP)"), nullable=False),
