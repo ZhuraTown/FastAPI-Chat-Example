@@ -42,9 +42,9 @@ LOGGER_CONFIG = {
         },
     },
     'formatters': {
-        'detailed': {
-            'format': '[%(asctime)s] %(levelname)s %(message)s [Request ID: %(request_id)s]',
-        },
+        # 'detailed': {
+        #     'format': '[%(asctime)s] %(levelname)s %(message)s [Request ID: %(request_id)s]',
+        # },
         'json': {
             '()': JsonFormatter,
             'format': '%(asctime) %(levelname) %(message)s',
@@ -57,17 +57,17 @@ LOGGER_CONFIG = {
             'formatter': 'json',
             'filters': ['contextual'],
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'app.log',
-            'level': 'DEBUG',
-            'formatter': 'json',
-            'filters': ['contextual'],
-        },
+        # 'file': {
+        #     'class': 'logging.FileHandler',
+        #     'filename': 'app.log',
+        #     'level': 'DEBUG',
+        #     'formatter': 'json',
+        #     'filters': ['contextual'],
+        # },
     },
     'loggers': {
         'app': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -77,13 +77,20 @@ LOGGER_CONFIG = {
             'propagate': False,
         },
         'asyncio': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
         },
+        "sqlalchemy": {
+            'handlers': ['console'],
+            "level": "INFO",
+            'propagate': False,
+        }
+
     },
     'root': {
         'level': 'DEBUG',
-        'handlers': ['console', 'file'],
+        'handlers': ['console'],
     },
+
 }
 
 config.dictConfig(LOGGER_CONFIG)

@@ -10,6 +10,7 @@ class ToCreateUserDTO(DTO):
     first_name: str
     last_name: str
     middle_name: str | None
+    password: str
 
 
 @dataclass(frozen=True)

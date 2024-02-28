@@ -1,4 +1,7 @@
 from typing import Sequence
+from uuid import UUID
+
+from sqlalchemy import Select, select, and_, func
 
 from infrastructure.db.converters.user import convert_user_dbmodel_to_dto
 from infrastructure.db.models import User
@@ -19,3 +22,42 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
             session.add_all(users)
             await session.commit()
         return [convert_user_dbmodel_to_dto(user) for user in users]
+
+    async def get_users_count(self, is_deleted: bool | None = None):
+        query: Select = (
+            select(func.count())
+            .select_from(User)
+        )
+        if is_deleted:
+            query.where(User.is_active.is_(True))
+
+        async with self._session() as session:
+            count = await session.execute(query)
+        return count.scalar_one()
+
+    async def get_users(self,
+                        limit: int | None = None,
+                        offset: int | None = None,
+                        is_deleted: bool | None = None):
+        query: Select = (
+            select(User)
+            .limit(limit)
+            .offset(offset)
+            .order_by(User.created_at)
+        )
+        if is_deleted:
+            query.where(User.is_active.is_(True))
+
+        async with self._session() as session:
+            users = await session.scalars(query)
+        return [convert_user_dbmodel_to_dto(user) for user in users.all()]
+
+
+
+
+
+
+
+
+
+

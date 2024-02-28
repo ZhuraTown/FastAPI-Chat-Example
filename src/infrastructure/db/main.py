@@ -10,7 +10,7 @@ from log import app_logger
 
 class Database:
     def __init__(self) -> None:
-        self.engine = create_async_engine(str(settings.infrastructure.postgres_dsn))
+        self.engine = create_async_engine(str(settings.infrastructure.postgres_dsn), echo=True)
         self.session_factory = async_sessionmaker(
             self.engine,
             class_=AsyncSession,
