@@ -31,6 +31,8 @@ class User(SQLAlchemyBaseUserTableUUID, BaseModel):
     last_name: Mapped[str] = mapped_column(String(64))
     middle_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
+    # TODO: later ??? eraser [User]
+
     def __repr__(self):
         return (
             f'<User id={self.id},'

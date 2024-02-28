@@ -1,7 +1,8 @@
+import datetime
 from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import Select, select, and_, func
+from sqlalchemy import Select, select, and_, func, Update, update
 
 from infrastructure.db.converters.user import convert_user_dbmodel_to_dto
 from infrastructure.db.models import User
@@ -11,7 +12,7 @@ from transfer.user import UserDTO
 
 class UserRepository(SqlAlchemyRepository[TypeS]):
 
-    async def create_user(self, user: User):  # todo: add tdo
+    async def create_user(self, user: User):
         async with self._session() as session:
             session.add(user)
             await session.commit()
@@ -22,6 +23,40 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
             session.add_all(users)
             await session.commit()
         return [convert_user_dbmodel_to_dto(user) for user in users]
+
+    async def get_user(self,
+                       user_id: UUID | None = None,
+                       email: str | None = None,
+                       # TODO: optional fields??
+                       ):
+        filters = {
+            User.id: user_id,
+            User.email: email
+        }
+        query: Select = (
+            select(User)
+            .where(and_(*[k == v for k, v in filters.items() if v is not None]))
+        )
+        async with self._session() as session:
+            user = await session.scalar(query)
+        return convert_user_dbmodel_to_dto(user)
+
+    async def deactivate_user(self,
+                              user_id: UUID,
+                              ):
+        query: Update = (
+            update(User)
+            .where(
+                User.id == user_id,
+            )
+            .values(
+                is_active=False,
+                deleted_at=datetime.datetime.now()
+            )
+        )
+        async with self._session() as session:
+            await session.execute(query)
+            await session.commit()
 
     async def get_users_count(self, is_deleted: bool | None = None):
         query: Select = (
