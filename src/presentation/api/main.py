@@ -3,6 +3,8 @@ from logging import WARNING
 from fastapi import FastAPI
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+
+from presentation.api.middlewares.logger import RequestLogMiddleware
 from src.presentation.api.cfg import api_settings
 
 from src.presentation.api.controllers.user import router as users_router
@@ -17,7 +19,7 @@ MIDDLEWARES = [
         allow_headers=['*'],
     ),
     # Middleware(ClientMiddleware),
-    # Middleware(RequestLogMiddleware),
+    Middleware(RequestLogMiddleware),
 ]
 
 app = FastAPI(

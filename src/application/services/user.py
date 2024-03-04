@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from application.services.exceptions.user import UserWithEmailAlreadyExists
 from infrastructure.db.converters.user import convert_created_user_to_dbmodel
 from infrastructure.db.repositories.user import UserRepository
 from src.application.common.services import RepoService
@@ -8,8 +9,9 @@ from transfer.user import ToCreateUserDTO
 
 class UserService(RepoService[UserRepository]):
 
-    # todo: validation unique user
     async def register_user(self, data: ToCreateUserDTO):
+        if await self._repository.get_user(email=data.email) is not None:
+            raise UserWithEmailAlreadyExists(data.email)
         created_user = await self._repository.create_user(
             convert_created_user_to_dbmodel(data, hash_password=data.password),
         )
