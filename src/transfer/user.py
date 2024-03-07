@@ -20,7 +20,7 @@ class UserDTO(DTO):
     first_name: str
     last_name: str
     middle_name: str | None
-    is_active: bool  # todo: ??
+    is_active: bool
 
     def __repr__(self) -> str:
         return (
@@ -29,4 +29,5 @@ class UserDTO(DTO):
             f'email={self.email}, '
             f'first_name={self.first_name}, '
             f'last_name={self.last_name}>'
+            f'is_active={self.is_active}>'
         )

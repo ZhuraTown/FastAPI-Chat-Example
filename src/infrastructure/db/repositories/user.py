@@ -27,11 +27,13 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
     async def get_user(self,
                        user_id: UUID | None = None,
                        email: str | None = None,
+                       is_active: bool | None = True,
                        # TODO: optional fields?? for search
                        ):
         filters = {
             User.id: user_id,
-            User.email: email
+            User.email: email,
+            User.is_active: is_active
         }
         query: Select = (
             select(User)
@@ -58,13 +60,13 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
             await session.execute(query)
             await session.commit()
 
-    async def get_users_count(self, is_deleted: bool | None = None):
+    async def get_users_count(self, is_active: bool | None = None):
         query: Select = (
             select(func.count())
             .select_from(User)
         )
-        if is_deleted:
-            query.where(User.is_active.is_(True))
+        if is_active is not None:
+            query = query.where(User.is_active.is_(is_active))
 
         async with self._session() as session:
             count = await session.execute(query)
@@ -73,19 +75,19 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
     async def get_users(self,
                         limit: int | None = None,
                         offset: int | None = None,
-                        is_deleted: bool | None = None):
+                        is_active: bool | None = None):
         query: Select = (
             select(User)
             .limit(limit)
             .offset(offset)
             .order_by(User.created_at)
         )
-        if is_deleted:
-            query.where(User.is_active.is_(True))
+        if is_active is not None:
+            query = query.filter(User.is_active.is_(is_active))
 
         async with self._session() as session:
             users = await session.scalars(query)
-        return [convert_user_dbmodel_to_dto(user) for user in users.all()]
+        return tuple([convert_user_dbmodel_to_dto(user) for user in users.all()])
 
 
 

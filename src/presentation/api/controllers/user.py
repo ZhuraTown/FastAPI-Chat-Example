@@ -1,11 +1,13 @@
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from application.services.user import UserService
+from application.services.interfaces.user import UserService
 from presentation.api.controllers.requests.user import RegisterUser
-from presentation.api.controllers.responses.user import UserResponse
+from presentation.api.controllers.responses import LimitOffsetPaginator, lo_paginator, PaginatedResponse
+from presentation.api.controllers.responses.user import UserDetailResponse
 from presentation.api.deps.services import user_service
 
 router = APIRouter(
@@ -14,24 +16,66 @@ router = APIRouter(
 )
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    name="register user",
+    response_model=UserDetailResponse
+)
 async def register_user(
         new_user: RegisterUser,
         service: Annotated[UserService, Depends(user_service)]
-) -> UserResponse:
+) -> UserDetailResponse:
     created_user = await service.register_user(data=new_user.convert_to_dto())
-    return UserResponse.convert_from_dto(created_user)
+    return UserDetailResponse.convert_from_dto(created_user)
 
 
-# TODO: register user
+@router.get(
+    "/{user_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UserDetailResponse,
+)
+async def get_user_details(
+        user_id: UUID,
+        # todo: add # auth_user
+        service: Annotated[UserService, Depends(user_service)]
+) -> UserDetailResponse:
+    user = await service.get_user_by_id(user_id=user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return UserDetailResponse.convert_from_dto(user)
 
-# todo: get_users
 
-# todo: get_me
+@router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def deactivate_user(
+        user_id: UUID,
+        # todo: add # auth_user
+        service: Annotated[UserService, Depends(user_service)]
+):
+    # todo: add check user self or admin
+    user = await service.get_user_by_id(user_id=user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return await service.deactivate_user(user_id)
 
-# todo: update_me
+
+@router.get("",
+            status_code=status.HTTP_200_OK,
+            name="get users"
+            )
+async def get_users(
+        paginator: Annotated[LimitOffsetPaginator[UserDetailResponse], Depends(lo_paginator)],
+        service: Annotated[UserService, Depends(user_service)],
+        is_active: bool = True,
+) -> PaginatedResponse[UserDetailResponse]:
+    users = await service.get_users(
+        limit=paginator.limit,
+        offset=paginator.offset,
+        is_active=is_active,
+    )
+    count = await service.get_users_count(is_active=is_active)
+    return paginator.paginate(users, count, model=UserDetailResponse)
 
 # todo: update_user
 
-# todo: deactivate_user
 
