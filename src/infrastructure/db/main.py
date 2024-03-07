@@ -28,7 +28,7 @@ class Database:
             finally:
                 await session.close()
 
-    async def uow_session(self) -> type[AsyncSession]:
+    async def uow_session(self) -> AsyncGenerator[AsyncSession, None]:
         async with self.session_factory() as session:
             yield session
 

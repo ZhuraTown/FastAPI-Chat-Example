@@ -4,9 +4,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from application.services.interfaces.user import UserService
-from presentation.api.controllers.requests.user import RegisterUser
-from presentation.api.controllers.responses import LimitOffsetPaginator, lo_paginator, PaginatedResponse
+from application.services.interfaces.user import UserServiceI
+from presentation.api.controllers.requests.user import (
+    RegisterUser,
+    UserUpdateRequest)
+from presentation.api.controllers.responses import (
+    LimitOffsetPaginator,
+    lo_paginator,
+    PaginatedResponse)
 from presentation.api.controllers.responses.user import UserDetailResponse
 from presentation.api.deps.services import user_service
 
@@ -24,7 +29,7 @@ router = APIRouter(
 )
 async def register_user(
         new_user: RegisterUser,
-        service: Annotated[UserService, Depends(user_service)]
+        service: Annotated[UserServiceI, Depends(user_service)]
 ) -> UserDetailResponse:
     created_user = await service.register_user(data=new_user.convert_to_dto())
     return UserDetailResponse.convert_from_dto(created_user)
@@ -38,7 +43,7 @@ async def register_user(
 async def get_user_details(
         user_id: UUID,
         # todo: add # auth_user
-        service: Annotated[UserService, Depends(user_service)]
+        service: Annotated[UserServiceI, Depends(user_service)]
 ) -> UserDetailResponse:
     user = await service.get_user_by_id(user_id=user_id)
     if not user:
@@ -50,7 +55,7 @@ async def get_user_details(
 async def deactivate_user(
         user_id: UUID,
         # todo: add # auth_user
-        service: Annotated[UserService, Depends(user_service)]
+        service: Annotated[UserServiceI, Depends(user_service)]
 ):
     # todo: add check user self or admin
     user = await service.get_user_by_id(user_id=user_id)
@@ -65,7 +70,7 @@ async def deactivate_user(
             )
 async def get_users(
         paginator: Annotated[LimitOffsetPaginator[UserDetailResponse], Depends(lo_paginator)],
-        service: Annotated[UserService, Depends(user_service)],
+        service: Annotated[UserServiceI, Depends(user_service)],
         is_active: bool = True,
 ) -> PaginatedResponse[UserDetailResponse]:
     users = await service.get_users(
@@ -76,6 +81,21 @@ async def get_users(
     count = await service.get_users_count(is_active=is_active)
     return paginator.paginate(users, count, model=UserDetailResponse)
 
-# todo: update_user
+
+@router.put(
+    "/{user_id}",
+    status_code=status.HTTP_200_OK,
+    name="update user",
+    response_model=UserDetailResponse
+)
+async def update_user(
+        user_id: UUID,
+        update_data: UserUpdateRequest,
+        service: Annotated[UserServiceI, Depends(user_service)]
+):
+    user = await service.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return await service.update_user(user, update_data.dict())
 
 

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import TypedDict
 from uuid import UUID
 
 from application.common.dto import DTO
@@ -31,3 +32,11 @@ class UserDTO(DTO):
             f'last_name={self.last_name}>'
             f'is_active={self.is_active}>'
         )
+
+
+class UpdatedUserData(TypedDict):
+    email: str
+    first_name: str
+    last_name: str
+    middle_name: str
+

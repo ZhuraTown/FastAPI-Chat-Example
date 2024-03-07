@@ -4,7 +4,7 @@ from uuid import UUID
 from transfer.user import UserDTO, ToCreateUserDTO
 
 
-class UserService(Protocol):
+class UserServiceI(Protocol):
 
     async def register_user(self, data: ToCreateUserDTO) -> UserDTO: ...
 

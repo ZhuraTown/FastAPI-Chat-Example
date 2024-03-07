@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, Self, Sequence, Type, TypeVar
 
 from fastapi import Request
-from pydantic import BaseModel, HttpUrl
+from pydantic import HttpUrl, BaseModel
 from starlette.datastructures import URL
 
 from application.common.dto import DTO
@@ -17,7 +17,7 @@ class BaseResponse(ABC, BaseModel, Generic[_DT]):
 
 
 T = TypeVar('T',
-            # bound=BaseResponse  # TODO: fix, why dont work??
+            # bound=BaseResponse # TODO: fix, why dont work??
             )
 
 

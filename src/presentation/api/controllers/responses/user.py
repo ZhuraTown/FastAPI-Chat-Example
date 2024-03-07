@@ -1,4 +1,4 @@
-from typing import Self, Optional  # noqa
+from typing import Self, Optional
 from uuid import UUID
 
 from src.presentation.api.controllers.responses import BaseResponse

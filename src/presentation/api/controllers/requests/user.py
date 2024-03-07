@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from transfer.user import ToCreateUserDTO
+from transfer.user import ToCreateUserDTO, UpdatedUserData
 
 
 class RegisterUser(BaseModel):
@@ -21,3 +21,13 @@ class RegisterUser(BaseModel):
             middle_name=self.middle_name,
             password=self.password
         )
+
+
+class UserUpdateRequest(BaseModel):
+    email: EmailStr
+    first_name: str = Field(..., max_length=64)
+    last_name: str = Field(..., max_length=64)
+    middle_name: Optional[str] = Field(None, max_length=64)
+
+    def typed_dict(self) -> UpdatedUserData:
+        return self.dict()

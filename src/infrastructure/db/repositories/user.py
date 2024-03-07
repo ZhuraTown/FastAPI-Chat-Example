@@ -6,22 +6,20 @@ from sqlalchemy import Select, select, and_, func, Update, update
 
 from infrastructure.db.converters.user import convert_user_dbmodel_to_dto
 from infrastructure.db.models import User
-from infrastructure.db.repositories.base import SqlAlchemyRepository, TypeS
-from transfer.user import UserDTO
+from infrastructure.db.repositories.base import SqlAlchemyRepository, S
+from transfer.user import UserDTO, UpdatedUserData
 
 
-class UserRepository(SqlAlchemyRepository[TypeS]):
+class UserRepository(SqlAlchemyRepository[S]):
 
     async def create_user(self, user: User):
-        async with self._session() as session:
-            session.add(user)
-            await session.commit()
+        self._session.add(user)
+        await self._session.flush()
         return convert_user_dbmodel_to_dto(user)
 
     async def create_users(self, users: Sequence[User]) -> Sequence[UserDTO]:
-        async with self._session() as session:
-            session.add_all(users)
-            await session.commit()
+        self._session.add_all(users)
+        await self._session.flush()
         return [convert_user_dbmodel_to_dto(user) for user in users]
 
     async def get_user(self,
@@ -39,8 +37,7 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
             select(User)
             .where(and_(*[k == v for k, v in filters.items() if v is not None]))
         )
-        async with self._session() as session:
-            user = await session.scalar(query)
+        user = await self._session.scalar(query)
         return convert_user_dbmodel_to_dto(user)
 
     async def deactivate_user(self,
@@ -56,9 +53,9 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
                 deleted_at=datetime.datetime.now()
             )
         )
-        async with self._session() as session:
-            await session.execute(query)
-            await session.commit()
+
+        await self._session.execute(query)
+        await self._session.flush()
 
     async def get_users_count(self, is_active: bool | None = None):
         query: Select = (
@@ -68,8 +65,7 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
         if is_active is not None:
             query = query.where(User.is_active.is_(is_active))
 
-        async with self._session() as session:
-            count = await session.execute(query)
+        count = await self._session.execute(query)
         return count.scalar_one()
 
     async def get_users(self,
@@ -85,9 +81,23 @@ class UserRepository(SqlAlchemyRepository[TypeS]):
         if is_active is not None:
             query = query.filter(User.is_active.is_(is_active))
 
-        async with self._session() as session:
-            users = await session.scalars(query)
+        users = await self._session.scalars(query)
         return tuple([convert_user_dbmodel_to_dto(user) for user in users.all()])
+
+    async def update_user(
+            self,
+            user_id: UUID,
+            update_data: UpdatedUserData
+    ) -> UserDTO:
+        query: Update = (
+            update(User)
+            .where(User.id == user_id)
+            .values(**update_data)
+        )
+        await self._session.execute(query)
+        await self._session.flush()
+        return await self.get_user(user_id=user_id)
+
 
 
 
