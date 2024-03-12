@@ -13,7 +13,9 @@ from presentation.api.controllers.responses import (
     lo_paginator,
     PaginatedResponse)
 from presentation.api.controllers.responses.user import UserDetailResponse
+from presentation.api.deps.auth import get_current_user
 from presentation.api.deps.services import user_service
+from transfer.user import UserDTO
 
 router = APIRouter(
     prefix="/users",
@@ -42,10 +44,13 @@ async def register_user(
 )
 async def get_user_details(
         user_id: UUID,
-        # todo: add # auth_user
+        # todo: add # current_user
+        current_user: Annotated[UserDTO, Depends(get_current_user)],
         service: Annotated[UserServiceI, Depends(user_service)]
 ) -> UserDetailResponse:
     user = await service.get_user_by_id(user_id=user_id)
+    print("....")
+    current_user
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return UserDetailResponse.convert_from_dto(user)
@@ -54,7 +59,7 @@ async def get_user_details(
 @router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def deactivate_user(
         user_id: UUID,
-        # todo: add # auth_user
+        # todo: add # current_user
         service: Annotated[UserServiceI, Depends(user_service)]
 ):
     # todo: add check user self or admin
@@ -70,9 +75,12 @@ async def deactivate_user(
             )
 async def get_users(
         paginator: Annotated[LimitOffsetPaginator[UserDetailResponse], Depends(lo_paginator)],
+        # todo: add # current_user
+        current_user: Annotated[UserDTO, Depends(get_current_user)],
         service: Annotated[UserServiceI, Depends(user_service)],
         is_active: bool = True,
 ) -> PaginatedResponse[UserDetailResponse]:
+    print(',,,,')
     users = await service.get_users(
         limit=paginator.limit,
         offset=paginator.offset,
@@ -91,6 +99,7 @@ async def get_users(
 async def update_user(
         user_id: UUID,
         update_data: UserUpdateRequest,
+        # todo: add # current_user
         service: Annotated[UserServiceI, Depends(user_service)]
 ):
     user = await service.get_user_by_id(user_id)

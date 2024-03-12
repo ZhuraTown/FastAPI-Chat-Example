@@ -7,6 +7,8 @@ from starlette.middleware.cors import CORSMiddleware
 from presentation.api.middlewares.logger import RequestLogMiddleware
 from chat.presentation.api.cfg import api_settings
 
+
+from chat.presentation.api.auth.controller import auth_router
 from chat.presentation.api.controllers.user import router as users_router
 
 
@@ -25,7 +27,8 @@ MIDDLEWARES = [
 app = FastAPI(
     title="ChatExample",
     version="1.0.0",
-    middleware=MIDDLEWARES
+    middleware=MIDDLEWARES,
+    debug=True
 
 )
 
@@ -35,6 +38,12 @@ ROUTERS = [
 
 for router in ROUTERS:
     app.include_router(router)
+
+app.include_router(
+    auth_router,
+    prefix='/auth/jwt',
+    tags=['auth']
+)
 
 
 def main():

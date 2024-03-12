@@ -21,6 +21,7 @@ fastapi-pagination = "^0.12.19"
 pydantic = "^2.6.3"
 fastapi-filter = "^1.1.0"
 fastapi-users-db-sqlalchemy = "^6.0.1"
+argon2-cffi = "^23.1.0"
 
 
 [build-system]
