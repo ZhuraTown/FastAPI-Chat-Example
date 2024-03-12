@@ -3,10 +3,10 @@ from logging.config import fileConfig
 
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.infrastructure.db.models import *
+from chat.infrastructure.db.models import *
 from sqlalchemy import engine_from_config, Connection
 from sqlalchemy import pool
-from src.config import settings
+from chat.config import settings
 
 from alembic import context
 

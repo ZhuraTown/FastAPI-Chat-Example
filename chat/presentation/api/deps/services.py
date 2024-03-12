@@ -8,6 +8,7 @@ from application.services.user import UserService
 from infrastructure.db.main import db
 from infrastructure.db.repositories.user import UserRepository
 from infrastructure.db.uow import SQLAlchemyUoW
+from transfer.user import UserDTO
 
 
 def user_service(

@@ -5,9 +5,9 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
 from presentation.api.middlewares.logger import RequestLogMiddleware
-from src.presentation.api.cfg import api_settings
+from chat.presentation.api.cfg import api_settings
 
-from src.presentation.api.controllers.user import router as users_router
+from chat.presentation.api.controllers.user import router as users_router
 
 
 MIDDLEWARES = [
@@ -41,7 +41,7 @@ def main():
     # TODO: use logger
     print("Server Start...")
     uvicorn.run(
-                app="src.presentation.api.main:app",
+                app="chat.presentation.api.main:app",
                 host=api_settings.HOST,
                 port=api_settings.PORT,
                 reload=api_settings.RELOAD,

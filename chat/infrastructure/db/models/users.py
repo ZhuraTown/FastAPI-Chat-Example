@@ -2,12 +2,11 @@ from typing import AsyncGenerator
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from fastapi_users.models import UP
 from sqlalchemy import String, Boolean
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Mapped, mapped_column
-from src.config import settings
-from src.infrastructure.db.models.base import BaseModel
+from chat.config import settings
+from chat.infrastructure.db.models.base import BaseModel
 
 
 class User(SQLAlchemyBaseUserTableUUID, BaseModel):

@@ -1,7 +1,7 @@
 from typing import Self, Optional
 from uuid import UUID
 
-from src.presentation.api.controllers.responses import BaseResponse
+from chat.presentation.api.controllers.responses import BaseResponse
 from transfer.user import UserDTO
 
 

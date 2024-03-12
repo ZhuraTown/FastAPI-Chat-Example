@@ -3,7 +3,7 @@ from uuid import UUID
 from application.services.exceptions.user import UserWithEmailAlreadyExists
 from infrastructure.db.converters.user import convert_created_user_to_dbmodel
 from infrastructure.db.repositories.user import UserRepository
-from src.application.common.services import UowRepoService
+from chat.application.common.services import UowRepoService
 from transfer.user import ToCreateUserDTO, UserDTO, UpdatedUserData
 
 
